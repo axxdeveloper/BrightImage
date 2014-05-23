@@ -1,4 +1,4 @@
-package net.maxbrightnessimage;
+package net.brightimage;
 
 import java.io.File;
 
