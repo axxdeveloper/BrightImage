@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="net.maxbrightnessimage.MainActivity" >
+
+    <item
+        android:id="@+id/choose_image"
+        android:orderInCategory="100"
+        android:title="@string/choose_image"
+        app:showAsAction="never"/>
+
+</menu>
