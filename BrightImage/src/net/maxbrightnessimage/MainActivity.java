@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -168,6 +167,7 @@ public class MainActivity extends Activity {
 		setActualBrightness(p.getInt(BRIGHTNESS, 255));
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void loadImage() {
 		SharedPreferences p = getPreferences(MODE_PRIVATE);
 		String picturePath = p.getString(IMG_PATH, "");
@@ -175,17 +175,26 @@ public class MainActivity extends Activity {
 		ImageView imageView = (ImageView) findViewById(R.id.selected_image);
 		if ( isBlank(picturePath) || !new File(picturePath).exists() ) {
 			p.edit().putString(IMG_PATH, "").commit();
+			imageView.setImageResource(R.drawable.default_image);
 			return;
 		}
 		Display display = getWindowManager().getDefaultDisplay();
 		Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-		@SuppressWarnings("deprecation")
+		Log.i(getClass().getName(), "display.h:" + display.getHeight() + ", display.w:" + display.getWidth());
 		boolean isLargeImage = bitmap.getHeight() > display.getHeight() || bitmap.getWidth() > display.getWidth();
 		if ( isLargeImage ) {
-			int h = bitmap.getScaledHeight(DisplayMetrics.DENSITY_LOW);
-			int w = bitmap.getScaledWidth(DisplayMetrics.DENSITY_LOW);
-			Log.i(getClass().getName(), "h:" + h + ", w:" + w);
-			imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, w, h, true));		
+			for ( int i = 1; i < 10; i++ ) {
+				int targetDensity = bitmap.getDensity() / i;
+				try {
+					int h = bitmap.getScaledHeight(targetDensity);
+					int w = bitmap.getScaledWidth(targetDensity);
+					Log.i(getClass().getName(), "reduce density to " + targetDensity);
+					imageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, w, h, true));
+					break;
+				} catch (OutOfMemoryError e) {
+					Log.w(getClass().getName(), "OOM when targetDensity:" + targetDensity);
+				}				
+			}
 		} else {
 			imageView.setImageBitmap(bitmap);
 		}
